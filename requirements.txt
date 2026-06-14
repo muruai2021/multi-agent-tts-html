@@ -1,0 +1,13 @@
+# multi-agent-tts-html — Python 依赖
+# 锁定版本，避免 API 漂移导致不可预期行为
+
+# HTTP 客户端（TTS API 调用）
+requests>=2.28,<3.0
+
+# Edge TTS 兜底（可选；未配置 MINIMAX_API_KEY 时必装）
+edge-tts>=6.1,<7.0
+
+# 测试依赖（dev）
+pytest>=7.0,<9.0
+pytest-cov>=4.0,<6.0
+bandit>=1.7,<2.0

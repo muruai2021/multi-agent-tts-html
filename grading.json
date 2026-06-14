@@ -1,0 +1,62 @@
+{
+  "skill_name": "multi-agent-tts-html",
+  "reviewer": "multi-agent-skills-review",
+  "timestamp": "2026-06-14 10:30:00",
+  "skill_path": "E:/work/skills/multi-agent-tts-html",
+  "dimensions": [
+    {
+      "name": "安全性",
+      "score": 94,
+      "max": 100,
+      "weight": 0.30,
+      "evidence": "无敏感信息泄露，API Key 全部从 .env/环境变量读取；无 sudo/chmod 777/curl|sh；requests.post 有 timeout=120；ffmpeg concat list 文件已对单引号转义",
+      "issues": [
+        "md2mp3.py:248-256 ffmpeg list 文件拼接存在 shell 元字符残留风险",
+        "subprocess.run capture_output=True 丢弃 stderr",
+        "缺少 requirements.txt 固定依赖版本"
+      ]
+    },
+    {
+      "name": "逻辑性",
+      "score": 92,
+      "max": 100,
+      "weight": 0.25,
+      "evidence": "frontmatter 7 字段基本完整；触发词覆盖中文/英文 × 7 类场景；9 个 Phase 流程含 2 个 GATE 阻断点；输入输出定义清晰（MD/批/MD→MP3→字幕→HTML→MP4）",
+      "issues": [
+        "缺少排除词（'只要字幕/不要 TTS' 会被误触发）",
+        "Phase 1 '收集 3 个源' 描述偏简略，无脚本支持",
+        "'改写对齐字幕' 语义模糊——未说明改写谁"
+      ]
+    },
+    {
+      "name": "稳定性",
+      "score": 73,
+      "max": 100,
+      "weight": 0.25,
+      "evidence": "错误处理章节存在（常见问题排查表），空输入/超长输入/格式错误均有处理；TTS MiniMax→Edge TTS 自动降级；ffprobe 有 10s 超时",
+      "issues": [
+        "完全无测试用例（test_pool.md 不存在）",
+        "SubsGen.py:38 re.sub(r'\\s+', ' ') 过度合并空白，破坏全角空格节奏",
+        "无去重/缓存机制——重复运行重复扣 TTS 配额",
+        "无并发安全——多个项目同时 init /tmp/<项目名> 会冲突",
+        "无结构化日志，长任务失败排查难"
+      ]
+    },
+    {
+      "name": "自我迭代",
+      "score": 25,
+      "max": 100,
+      "weight": 0.20,
+      "evidence": "v1.0.0 新技能，无 failure_case_log.md、无 self-review-template.md、无回归测试；健康度 +2（30 天无新增错误）",
+      "issues": [
+        "无 failure_case_log.md（错误案例日志）",
+        "无 self-review-template.md（自我复盘机制）",
+        "无 test_pool.md（回归测试用例）"
+      ]
+    }
+  ],
+  "total_score": 74,
+  "grade": "良好",
+  "pass": true,
+  "recommendation": "技能整体良好，安全性/逻辑性优秀（>90）。主要短板：自我迭代机制空白（25/100）。建议 P0 本迭代补齐 failure_case_log + self-review-template + test_pool 三大文件 + requirements.txt + 排除词；P1 修复 SubsGen.py 空白合并 bug、加缓存/去重、改 stdin pipe 喂 ffmpeg；P2 下版本加 collect-assets.py 和结构化日志。"
+}
