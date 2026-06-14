@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "format": "json",
+  "count": 13,
+  "timestamps": [
+    {
+      "start": 0.0,
+      "end": 2.741,
+      "duration": 2.741,
+      "text": "你以为 AI 是直接跟你聊的？"
+    },
+    {
+      "start": 2.741,
+      "end": 5.279,
+      "duration": 2.538,
+      "text": "中间其实隔着一个东西—"
+    },
+    {
+      "start": 5.279,
+      "end": 5.584,
+      "duration": 0.305,
+      "text": "—harness。"
+    },
+    {
+      "start": 5.584,
+      "end": 8.833,
+      "duration": 3.249,
+      "text": "说白了...harness 就是一个中间层。"
+    },
+    {
+      "start": 8.833,
+      "end": 13.909,
+      "duration": 5.076,
+      "text": "你按回车发消息...harness 先接到，决定要不要调工具、"
+    },
+    {
+      "start": 13.909,
+      "end": 15.635,
+      "duration": 1.726,
+      "text": "读文件、跑命令。"
+    },
+    {
+      "start": 15.635,
+      "end": 17.361,
+      "duration": 1.726,
+      "text": "举个真实例子。"
+    },
+    {
+      "start": 17.361,
+      "end": 18.376,
+      "duration": 1.015,
+      "text": "settings.json 里配权限—"
+    },
+    {
+      "start": 18.376,
+      "end": 19.392,
+      "duration": 1.015,
+      "text": "—PreToolUse 钩子先跑、"
+    },
+    {
+      "start": 19.392,
+      "end": 23.402,
+      "duration": 4.01,
+      "text": "PostToolUse 再扫一遍日志，最后才轮到模型回话。"
+    },
+    {
+      "start": 23.402,
+      "end": 27.666,
+      "duration": 4.264,
+      "text": "这中间任何一步拦住...对话就停了。"
+    },
+    {
+      "start": 27.666,
+      "end": 31.423,
+      "duration": 3.757,
+      "text": "所以 90% 的\"AI 抽风\"...根因都在 harness 配置上。"
+    },
+    {
+      "start": 31.423,
+      "end": 34.164,
+      "duration": 2.741,
+      "text": "下次出问题别光骂 AI，先翻 harness。"
+    }
+  ],
+  "meta": {
+    "audio_duration": 34.164
+  }
+}
