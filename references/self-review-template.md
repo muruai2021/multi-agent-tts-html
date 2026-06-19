@@ -68,6 +68,47 @@
 
 ---
 
+## 🎨 视觉风格自检清单（v1.5.0 新增）
+
+### 浅色风格自检（默认必过）
+
+- [ ] 底色用 `#FAFAF7` 或渐变白 `#FFFFFF→#F0F4F1`，**不是纯黑**？
+- [ ] 文字主色 `#1A1A1A`（深灰黑），**不是纯黑 #000**？
+- [ ] 品牌主色 `#07C160`（微信绿）作为强调？
+- [ ] 卡片用白底 + 浅阴影，**不是深色卡片**？
+- [ ] `font-family: sans-serif`（避免 hyperframes 不识别的 PingFang SC）？
+- [ ] lint `font_family_without_font_face` 0 errors？
+
+### 首页封面自检（强制）
+
+- [ ] 主标题字号 ≥ 120px（推荐 148px）？
+- [ ] 主标题字重 = 900（黑体）？
+- [ ] 主标题加 `text-shadow: 0 4px 24px rgba(7,193,96,0.08)` 品牌色微光？
+- [ ] kicker 36px 600 #07C160 letter-spacing 8px？
+- [ ] 左上角标 28px 700 #888（14px 绿点 + 大写英文）？
+- [ ] 右下页码 24px 600 #999（"01 / 08" 格式）？
+- [ ] 背景用 `linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%)` 渐变？
+
+### 第一人称自检（硬约束 #5）
+
+- [ ] 全文"我"出现次数 = 0？
+- [ ] 禁用 "我跟你说 / 我跟你讲 / 我有个朋友 / 反正我 / 我直说"？
+- [ ] 用 "说白了 / 其实 / 告诉你 / 想象一下 / 嗯 / 知道吧" 替代？
+
+### lint 全过自检（渲染前必跑）
+
+```bash
+hyperframes lint <project>
+# 期望：0 errors（warnings 可忽略：studio_missing_editable_id 是非阻塞）
+```
+
+- [ ] `missing_timeline_registry` 已注册 `window.__timelines`？
+- [ ] `media_missing_id` audio 已有 `id="voiceover"`？
+- [ ] `overlapping_clips_same_track` page slide duration 减 0.05s？
+- [ ] `font_family_without_font_face` 字体用 sans-serif 兜底？
+
+---
+
 ## 🔗 关联
 
 - 失败案例日志：`references/failure_case_log.md`

@@ -78,7 +78,7 @@ def split_to_caption_sentences(
 
         # 找所有次级标点位置（在字符之后的位置）
         sub_breaks = []
-        for m in re.finditer(r'[,;:、——]', s):
+        for m in re.finditer(r'[,;:、——，；：。！？.…]+', s):
             sub_breaks.append(m.end())  # 标点之后的位置
 
         if not sub_breaks:
@@ -88,7 +88,7 @@ def split_to_caption_sentences(
             else:
                 best = -1
                 for i, ch in enumerate(s):
-                    if ch in ',;:。！？、——' and abs(i - max_chars) < abs(best - max_chars):
+                    if ch in ',;:。！？、——，；：' and abs(i - max_chars) < abs(best - max_chars):
                         best = i + 1
                 if best > 0 and best < len(s):
                     result.append(s[:best].strip())
@@ -103,7 +103,7 @@ def split_to_caption_sentences(
         cur = ""
         for i, ch in enumerate(s):
             cur += ch
-            if ch in ',;:、——':
+            if ch in ',;:。！？、——，；：.':
                 # 在标点后切（cur 已包含该标点）
                 if len(cur) >= min_chars:
                     result.append(cur.strip())
@@ -121,9 +121,18 @@ def split_to_caption_sentences(
             # 仍过长，找最近标点切（不硬切）
             best = -1
             for i, ch in enumerate(s):
-                if ch in ',;:。！？、——' and abs(i - max_chars) < abs(best - max_chars):
+                if ch in ',;:。！？、——，；：.' and abs(i - max_chars) < abs(best - max_chars):
                     best = i + 1
-            if best > 0 and best < len(s):
+            # 兜底：若 best 落到末尾/无效，退而求其次找任一可切点（保证两段都 >= min_chars）
+            if not (0 < best < len(s)):
+                fallback = -1
+                for i, ch in enumerate(s):
+                    if ch in ',;:。！？、——，；：.' and 0 < i < len(s) - 1:
+                        if len(s[:i+1].strip()) >= min_chars and len(s[i+1:].strip()) >= min_chars:
+                            fallback = i + 1
+                            break  # 取第一个能切的就行
+                best = fallback
+            if 0 < best < len(s):
                 final.append(s[:best].strip())
                 rest = s[best:].strip()
                 if rest:

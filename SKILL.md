@@ -1,7 +1,7 @@
 ---
 name: multi-agent-tts-html
-description: "Use when 用户需要：口播稿写作（反 AI 味）、MiniMax TTS 语音合成、Edge TTS 兜底、字幕轨生成（SRT/VTT/JSON）、16:9 视频化 HTML 排版（HyperFrames）、一键渲染 MP4 视频。**核心流程**：口播稿 → GATE1 → TTS+字幕 → 内容映射 → HyperFrames HTML排版 → GATE2 → 渲染 MP4。**一条命令出片**。**硬约束**：GATE1 必过 / GATE2 必过 / 翻页每 10s / 不虚构数字/场景/人物。"
-version: 1.4.0
+description: "Use when 用户需要：口播稿写作（反 AI 味 + 禁用第一人称）、MiniMax TTS 语音合成、Edge TTS 兜底、字幕轨生成（SRT/VTT/JSON）、16:9 视频化 HTML 排版（HyperFrames，支持浅色风格 / 首页加大加粗封面）、一键渲染 MP4 视频。**核心流程**：口播稿 → GATE1 → TTS+字幕 → 内容映射 → HyperFrames HTML排版 → GATE2 → 渲染 MP4。**一条命令出片**。**硬约束**：GATE1 必过 / GATE2 必过 / 翻页每 10s / 不虚构数字/场景/人物 / 禁用第一人称。兼容触发词：MiniMax TTS / mmx-tts / MD转MP3 / 反AI味 / 浅色风格 / 封面。"
+version: 1.5.0
 author: Muru AI
 license: MIT
 platforms: [linux, macos, windows]
@@ -102,7 +102,7 @@ cd                    # Windows CMD（显示当前目录）
 
 ---
 
-## 🚨 硬约束（4 条，必须死守）
+## 🚨 硬约束（5 条，必须死守）
 
 | # | 硬约束 | 触发时机 | 违规动作 |
 |---|--------|----------|----------|
@@ -110,6 +110,7 @@ cd                    # Windows CMD（显示当前目录）
 | 2 | ⛔ **HTML 排版必须经 GATE 2 人工审定** | Phase 3 完成后 | 写完直接渲染 |
 | 3 | **翻页节奏：每 10 秒一页** | Phase 3 排版时 | 8 分钟做 4 页 ❌ |
 | 4 | **不虚构数字/场景/人物** | Phase 2/3 全程 | 排版出现字幕里没有的内容 |
+| 5 | ⛔ **禁用第一人称**（"我跟你说"、"我跟你讲"、"我有个朋友"、"反正我..."） | Phase 0.1 写稿 | "我" 出现次数 > 0 |
 
 ---
 
@@ -159,6 +160,7 @@ python scripts/tts-with-subs.py 20260614_harness-intro_v1.md --md --output harne
 | 痛点/维度/链路/壁垒 | 烦心事/方面/路子/门槛 |
 | 在当今...时代/随着...发展 | 直接说事 |
 | 让我们共同.../综上所述 | 别说"我们"/收尾要轻 |
+| **⛔ 第一人称"我"**（我跟你说/我跟你讲/我有个朋友/反正我.../我直说...）| 说白了/其实/告诉你/想象一下/嗯/知道吧 |
 
 **禁用结构**：
 - 三段排比、工整对仗、金句三连
@@ -183,14 +185,14 @@ python scripts/tts-with-subs.py 20260614_harness-intro_v1.md --md --output harne
 | # | 类型 | 例子 |
 |---|------|------|
 | 1 | 颠覆认知 | "你可能不信，但做了 5 年 XX 的人，90% 都做错了" |
-| 2 | 痛点直击 | "我跟你说，这个事儿我快被它气死了" |
+| 2 | 痛点直击 | "说真的，这个事儿快把人气死了" |
 | 3 | 反差冲击 | "花了 30 万买的教训，今天免费告诉你" |
 | 4 | 悬念 | "你知道为什么 XX 总是失败吗？" |
 | 5 | 数字碾压 | "一秒钟，损失 800 块" |
 | 6 | 场景代入 | "想象一下，你周一早上刚到工位..." |
-| 7 | 故事开场 | "我有个朋友，在大厂干了 8 年" |
+| 7 | 故事开场 | "有个朋友，在大厂干了 8 年" |
 | 8 | 反问 | "你有没有这种感觉？" |
-| 9 | 否定常识 | "我直说，XX 这事儿其实没必要做" |
+| 9 | 否定常识 | "直说吧，XX 这事儿其实没必要做" |
 | 10 | 冒犯型（慎用） | "说真的，听完这段的人 90% 还在用错误的方法" |
 
 ### 口播稿格式
@@ -223,6 +225,7 @@ pause_ms: 600
 - [ ] 闭眼读一遍像在跟朋友说话？
 - [ ] 字数 / 240 = 时长符合预期？
 - [ ] 至少 3 处用了 `...` 或 `——` 标记停顿？
+- [ ] **⛔ 第一人称"我"出现次数 = 0**（GATE 1 必查）
 
 ---
 
@@ -512,6 +515,203 @@ python scripts/tts-with-subs.py <口播稿.md> --md --output <项目名> --all-s
 
 ---
 
+## 🎨 视觉风格规范（v1.5.0 标准化）
+
+> **风格两条路**：浅色系（米白/微信绿点缀）与深色系（黑底/高对比）。本次新增浅色风格，沉淀自 2026-06-19 微信 Agent 案例。
+> 默认使用**浅色风格**（适合商业/科技/财经类口播视频），深色系仅在用户明确要求"暗色/夜场"风格时使用。
+
+### 1. 浅色风格色板（强制标准）
+
+| 角色 | 颜色 | 用途 |
+|------|------|------|
+| **底色（主）** | `#FAFAF7` 米白 | 默认页面背景，温柔不刺眼 |
+| **底色（封面/重点页）** | `linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%)` | 封面、结论页增加呼吸感 |
+| **底色（纯白）** | `#FFFFFF` | 收尾页、卡片背景 |
+| **品牌主色** | `#07C160` 微信绿 | 强调字、装饰线、icon、按钮描边 |
+| **文字主色** | `#1A1A1A` 深灰黑 | 标题、主文案（**不用纯黑 #000，更柔和**） |
+| **文字次色** | `#333` / `#555` / `#666` / `#888` | 副标、注释、辅助文字（按权重递减） |
+| **文字点缀** | `#999` | 弱化标签、角标、页码 |
+| **分割线/装饰** | `#07C160` 或 `#E8F8EF` 极浅绿 | 短粗分割线、阴影块 |
+
+**强制规则**：
+- ❌ **禁用**纯黑 `#000` 背景（与浅色风格冲突）
+- ❌ **禁用**深色卡片（卡片永远是白底 + 浅阴影）
+- ✅ 主标题可用 `text-shadow: 0 4px 24px rgba(7,193,96,0.08)` 加品牌色微光
+
+### 2. 字体与字重
+
+```css
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "Microsoft YaHei", "PingFang SC", sans-serif;
+  /* ⚠️ 渲染时禁用 PingFang SC（hyperframes 不识别），
+     兜底用 sans-serif 即可 */
+}
+
+/* 推荐渲染时简化为：*/
+font-family: sans-serif;
+```
+
+**字重阶梯**：
+- 标题：`font-weight: 900` (黑体) 或 `800`
+- 副标：`font-weight: 700`
+- 正文：`font-weight: 500`
+- 辅助：`font-weight: 400`
+
+### 3. 首页封面规范（v1.5.0 强制标准）
+
+> **首页必须加大加粗，兼顾杂志封面观感**。这是用户首次明确提出的设计要求，所有口播视频首页都应遵循此规范。
+
+#### 强制参数
+
+| 元素 | 字号 | 字重 | 颜色 | 位置 |
+|------|------|------|------|------|
+| **主标题** | `120-148px` | `900` | `#111` | 居中，最大宽 1700px |
+| **品牌副标** | `36-46px` | `600` | `#07C160` | 标题上方，letter-spacing 8px |
+| **副标解释** | `46px` | `500` | `#555` | 标题下方，letter-spacing 4px |
+| **角标** | `28px` | `700` | `#888` | 左上角，14px 绿点 + 大写英文 |
+| **页码** | `24px` | `600` | `#999` | 右下角，"01 / 08" 格式 |
+
+#### 视觉细节
+
+```css
+/* 渐变背景（封面/结论页）*/
+background: linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%);
+
+/* 标题微光（品牌色投影，浅淡不抢戏）*/
+text-shadow: 0 4px 24px rgba(7,193,96,0.08);
+
+/* 标题中的强调词用 brand color */
+.title .accent { color: #07C160; }
+
+/* 角标前缀小绿点（圆点） */
+.corner-mark::before {
+  content: ""; display: inline-block;
+  width: 14px; height: 14px; background: #07C160;
+  border-radius: 50%; margin-right: 14px;
+  vertical-align: middle;
+}
+```
+
+#### 完整首页模板（直接复制）
+
+```html
+<section class="slide page-1 clip active" data-start="0" data-duration="9.85" data-track-index="0">
+  <div class="corner-mark">PROJECT · 2026</div>
+  <div class="kicker">2026 · 行业关键词</div>
+  <h1 class="title">主标题第一行<br><span class="accent">强调段（品牌色）</span></h1>
+  <div class="subtitle">—— 一句话副标解释</div>
+  <div class="corner-num">01 / 08</div>
+</section>
+```
+
+```css
+.page-1 {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%);
+}
+.page-1 .kicker {
+  font-size:36px; font-weight:600; color:#07C160;
+  letter-spacing:8px; margin-bottom:48px; text-transform:uppercase;
+}
+.page-1 .title {
+  font-size:148px; font-weight:900; line-height:1.18; text-align:center;
+  color:#111; letter-spacing:2px; max-width:1700px;
+  text-shadow: 0 4px 24px rgba(7,193,96,0.08);
+}
+.page-1 .title .accent { color:#07C160; }
+.page-1 .subtitle {
+  margin-top:56px; font-size:46px; font-weight:500; color:#555;
+  letter-spacing:4px;
+}
+.page-1 .corner-mark {
+  position:absolute; top:60px; left:80px;
+  font-size:28px; font-weight:700; color:#888; letter-spacing:3px;
+}
+.page-1 .corner-mark::before {
+  content:""; display:inline-block; width:14px; height:14px;
+  background:#07C160; border-radius:50%; margin-right:14px;
+  vertical-align:middle;
+}
+.page-1 .corner-num {
+  position:absolute; bottom:60px; right:80px;
+  font-size:24px; color:#999; font-weight:600; letter-spacing:2px;
+}
+```
+
+### 4. 浅色风格 8 页版式（参考案例）
+
+| 页 | 时段 | 版式 | 关键元素 |
+|---|------|------|----------|
+| 1 | 0-10s | **cover-magazine** | 标题加大加粗 + 角标 + 页码 + 渐变背景 |
+| 2 | 10-21s | **big-stats** | 280-360px 巨号数字 + 解释文 + 箭头胶囊 |
+| 3 | 21-32s | **pull-quote** | 240px 引号 + 84px 引言 + 6px 分隔线 |
+| 4 | 32-43s | **chat-mockup** | 手机框（白底+浅阴影） + 用户/AI 气泡 |
+| 5 | 43-52s | **number-list** | 360px 大编号 + 72px 标题 + 描述段 |
+| 6 | 52-64s | **three-pillars** | 三栏卡片（白底+8px 顶部绿条+浅阴影） |
+| 7 | 64-74s | **pull-quote** | 大字结论（120px 900 字重）+ 渐变背景 |
+| 8 | 74-77s | **outro** | 36px 绿点 + 96px 留白式结语 + 尾签 |
+
+### 5. 浅色风格 vs 深色风格对比
+
+| 维度 | 浅色风格 | 深色风格 |
+|------|----------|----------|
+| 底色 | `#FAFAF7` / 渐变白 | `#0A0A0A` / `#1A1A1A` |
+| 主文字 | `#1A1A1A` | `#FFFFFF` / `#F5F5F5` |
+| 强调色 | `#07C160` 绿 | `#00FF88` 荧光绿 / `#FFD700` 金 |
+| 卡片 | 白底 + 浅阴影 | 深灰 + 1px 亮边 |
+| 适用 | 商业/科技/财经/微信生态 | 游戏/夜场/科幻/赛博朋克 |
+| 渲染 | 简单（系统默认字体即可）| 需加载 webfont |
+
+### 6. lint 预检（浅色风格）
+
+渲染前必须用 `hyperframes lint` 检查：
+
+| 错误 | 原因 | 修复 |
+|------|------|------|
+| `missing_timeline_registry` | 未注册 `window.__timelines` | 见下方模板 |
+| `media_missing_id` | audio 无 id | 加 `id="voiceover"` |
+| `overlapping_clips_same_track` | clip 间浮点重叠 | duration 减 0.05s |
+| `font_family_without_font_face` | 用 PingFang SC | 改 `font-family: sans-serif` |
+
+**完整 HTML 头部（浅色风格 + lint 全过）**：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>...</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  html, body { width:1920px; height:1080px; overflow:hidden;
+    font-family: sans-serif; background:#FAFAF7; color:#1A1A1A; }
+  /* 浅色风格 CSS ... */
+  .slide.clip { visibility:hidden; }
+  .slide.clip.active { visibility:visible; }
+</style>
+</head>
+<body>
+<div class="hf-root" data-composition-id="xxx" data-width="1920" data-height="1080" data-start="0">
+  <audio id="voiceover" src="audio.mp3" data-start="0" data-duration="76.896"></audio>
+  <section class="slide page-1 clip active" data-start="0" data-duration="9.85" data-track-index="0">...</section>
+  <!-- ... 8 页 sections ... -->
+  <div id="sub-bar">
+    <div class="sub-cue clip" data-start="0" data-duration="2.005" data-track-index="1">字幕</div>
+    <!-- ... 39 句 ... -->
+  </div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  window.__timelines["xxx"] = tl;
+  // ... applyState 逻辑
+</script>
+</body>
+</html>
+```
+
+---
+
 ### 翻页节奏（硬约束 3）
 
 ```
@@ -693,6 +893,7 @@ multi-agent-tts-html/
 |------|------|------|
 | **1.2.1** | 2026-06-14 | **F-002 复现修复**：删除 F-008 加的 `.clip[data-start="0"]` 兜底规则（与 `.clip.active` 同特异性导致 page-1 永远不隐藏），依赖 JS 在 DOMContentLoaded 立即 `applyState()` 给第一页加 `.active`；给 `.hf-root` 加 `overflow: hidden` 防装饰元素溢出 |
 | **1.3.0** | 2026-06-14 | **GATE 1 强制阻断机制上线**：`tts-with-subs.py` 和 `md2mp3.py` 必须显式传 `--gate1-approved` 才能调 TTS，否则 exit(1)。把硬约束 #1 从文档约束升级为技术约束 |
+| **1.5.0** | 2026-06-19 | **🎨 视觉风格规范 + 首页封面 + 禁用第一人称**：①新增「🎨 视觉风格规范」章节，固化浅色风格色板（米白 #FAFAF7 / 微信绿 #07C160 / 字体 sans-serif）、首页封面模板（148px 900 字重 + kicker 角标 + 页码 + 渐变背景）、8 页版式参考、浅色 vs 深色风格对照、完整 HTML 模板（lint 全过版）②硬约束新增 #5「禁用第一人称」③反 AI 味禁用词表加第一人称条④10 项自检加第一人称核查项⑤10 种钩子模板示例去"我"⑥description 加浅色风格 / 封面 / 禁用第一人称触发词 |
 | **1.4.0** | 2026-06-14 | **🎬 字幕样式规范固化**：Phase 3 新增「字幕样式规范」章节，强制 42px / 21px 60px padding / 三层 text-shadow / bottom 118px / 禁用背景容器。所有 harness-intro 系列视频必须使用此规范 |
 | **1.1.2** | 2026-06-14 | **HTML 黑屏 bug 修复**：①CSS 默认显示第一页（`data-start="0"`）②JS 改为 DOMContentLoaded 立即启动循环（不依赖 audio.play）③加播放按钮兜底（防浏览器 autoplay 拦截）|
 | **1.1.1** | 2026-06-14 | **文档可发现性修复**：①SKILL.md 顶部新增「📁 文件存放约定」章节，明确用户产物存放在「当前工作目录」而非 skill 目录或 examples/ 子目录②目录结构章节加 ⚠️ 提示区分 skill 源码 vs 用户产物 |

@@ -83,6 +83,12 @@
 | RE-009 | F-009 | **F-002 复现防护** → Playwright 在 audio.currentTime=12s 时截图，验证只有 page-2 可见（page-1/3/4 visibility:hidden）。同时在 audio.currentTime=0s 截图，验证只有 page-1 可见 | ⬜ |
 | RE-010 | F-010 | **GATE 1 强制阻断** → `tts-with-subs.py` 不加 `--gate1-approved` 应 exit(1)；加 flag 应正常跑通。加 `md2mp3.py` 同理 | ⬜ |
 | RE-011 | F-011 | **字幕样式规范合规** → 解析 HTML，验证 `.sub-cue` 必须有 `font-size:42px`、`background:none`、`text-shadow` 3 层；`#sub-bar` 必须有 `bottom:118px`。不符合任意一项 = 不通过 | ⬜ |
+| RE-012 | F-012 | **第一人称硬约束** → grep 口播稿 `.md` 文件，验证 `我` 在正文（去 frontmatter+标题）出现次数 = 0；同时检查 10 种钩子模板示例中不含第一人称 | ⬜ |
+| RE-013 | F-013 | **浮点重叠防护** → 解析 HTML，验证所有 page slide 的 `data-start + data-duration` < 下一个 `data-start`（允许 0.001s 浮点容差，理想留 0.05s gap）。所有 sub-cue 同样检查 | ⬜ |
+| RE-014 | F-014 | **timeline registry 必备** → 解析 HTML，验证 `<script>` 块含 `window.__timelines = window.__timelines || {}` 和 `gsap.timeline({paused:true})`，且 `<head>` 含 `gsap@3.14.2` CDN import | ⬜ |
+| RE-015 | F-015 | **字体兜底** → 解析 HTML，验证 `font-family` 不含 `PingFang SC` / `Microsoft YaHei` 等未在 hyperframes 注册的字体（兜底用 `sans-serif`） | ⬜ |
+| RE-016 | F-016 | **audio id 必备** → 解析 HTML，验证 `<audio>` 元素含 `id=` 属性（推荐 `id="voiceover"`） | ⬜ |
+| RE-017 | F-017 | **浅色风格 + 首页封面规范** → 解析 HTML，验证：①背景用 `#FAFAF7` 或 `#FFFFFF→#F0F4F1` 渐变（非 `#000`）②`.page-1 .title` 含 `font-size:148px` 和 `font-weight:900`③`.page-1` 含 `linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%)` ④含 `.corner-mark` 和 `.corner-num` ⑤含品牌色 `#07C160` | ⬜ |
 
 ---
 
