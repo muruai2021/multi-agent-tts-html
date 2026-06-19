@@ -121,6 +121,13 @@ hyperframes lint <project>
 - [ ] 单自然句 > 22 字时（次级标点拆分），拆分后的两段都 ≥ 10 字？
 - [ ] 短自然句（< 10 字）应被合并到下一自然句而非独立成句？
 
+### 🔧 SubsGen.py 中文字数自检（v1.5.4 关键修复）
+
+- [ ] grep `SubsGen.py` 验证所有 min/ideal/max 阈值判断都改用 `_cn_count()`（不能用 `len()`）
+- [ ] Step 3.5 短段回合并存在（循环 while changed）
+- [ ] Step 6 末段吸附存在
+- [ ] 单元测试：wx-agent-ai 口播稿切完 100% ≥ 10 中文字
+
 ---
 
 ## 🔗 关联

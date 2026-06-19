@@ -19,6 +19,11 @@ from typing import List, Dict, Optional, Tuple
 
 # ============== 文本切分 ==============
 
+def _cn_count(s: str) -> int:
+    """中文字符数（v1.5.4 修复：与 SKILL.md 文档一致，不含标点空白）"""
+    return len(re.findall(r'[一-鿿]', s))
+
+
 def split_to_caption_sentences(
     text: str,
     min_chars: int = 10,
@@ -26,22 +31,29 @@ def split_to_caption_sentences(
     max_chars: int = 26,
 ) -> List[str]:
     """
-    把口播文本切分为字幕句(v2 - 自然边界优先).
+    把口播文本切分为字幕句(v3 - 按自然句优先 + 中文字数硬约束).
 
-    设计原则:
-      1. 优先在标点(。！？)切,得到"自然句"
-      2. 短句(< min_chars)与下一句合并,直到 min_chars
-      3. 长句(> ideal_chars)按次级标点(,;:、——)切,优先在标点后切
-      4. 太长(> max_chars)在最近标点切,绝不硬切单词
-      5. 绝不允许单字句(< 4 字)
+    设计原则（v1.5.4 重构）:
+      1. 按自然句（。！？）切分（边界神圣不可破）
+      2. 短句(< min_chars)与下一自然句合并，直到 ≥ min_chars
+      3. 单自然句 > ideal_chars → 在其内部按次级标点切
+      4. 单自然句 > max_chars → 兜底在最近次级标点硬拆
+      5. 绝不允许 < min_chars 字（除非全文末句）
+      6. 计数单位：中文字符数（_cn_count），不含标点/空白/ASCII
+
+    修复历史:
+      v1.0.0 - 初版
+      v1.0.1 - 保留全角空格(　) 修复段落节奏
+      v1.5.2 - min_chars 默认 6→10
+      v1.5.3 - 「按自然句断句」作为第一原则
+      v1.5.4 - 关键修复：min/ideal/max 阈值改用 _cn_count() 中文字数（之前用 len() 含标点导致 9 字自然句被认作 11 字符通过硬约束）
     """
     # 仅合并半角空白(空格/Tab/换行),保留全角空格(　)和段落换行节奏
-    # 修复: v1.0.1 - 之前 r'\s+' 会吞掉全角空格,破坏口播稿的段落节奏标记
     text = re.sub(r'[ \t\r\n]+', ' ', text).strip()
     if not text:
         return []
 
-    # 1. 主切分: 。！？  (保留标点)
+    # 1. 主切分: 。！？  (保留标点) — 自然句边界
     primary = re.split(r'([。！？!?])', text)
     sentences = []
     for i in range(0, len(primary) - 1, 2):
@@ -51,16 +63,16 @@ def split_to_caption_sentences(
     if len(primary) % 2 == 1 and primary[-1].strip():
         sentences.append(primary[-1].strip())
 
-    # 2. 短句合并(达到 min_chars 才断开,不必等到 ideal_chars)
+    # 2. 短句合并（自然句完整优先）— 用中文字数判断
     merged = []
     buffer = ""
     for s in sentences:
         if not buffer:
             buffer = s
-        elif len(buffer) < min_chars:
+        elif _cn_count(buffer) < min_chars:
             # 累积到 min_chars，不等到 ideal_chars——避免 s 被丢弃
             buffer += s
-            if len(buffer) >= min_chars:
+            if _cn_count(buffer) >= min_chars:
                 merged.append(buffer)
                 buffer = ""
         else:
@@ -69,21 +81,21 @@ def split_to_caption_sentences(
     if buffer:
         merged.append(buffer)
 
-    # 3. 长句按次级标点切(,;:、——)
+    # 3. 单自然句 > ideal_chars → 在自然句内部按次级标点切（不跨自然句）
     result = []
     for s in merged:
-        if len(s) <= ideal_chars:
+        if _cn_count(s) <= ideal_chars:
             result.append(s)
             continue
 
         # 找所有次级标点位置（在字符之后的位置）
         sub_breaks = []
-        for m in re.finditer(r'[,;:、——，；：。！？.…]+', s):
+        for m in re.finditer(r'[,;:、——，；：]+', s):
             sub_breaks.append(m.end())  # 标点之后的位置
 
         if not sub_breaks:
-            # 没有次级标点，在 max_chars 附近找最近标点切
-            if len(s) <= max_chars:
+            # 没有次级标点：若 ≤ max_chars 保留整段；否则兜底在 max_chars 附近切
+            if _cn_count(s) <= max_chars:
                 result.append(s)
             else:
                 best = -1
@@ -99,25 +111,41 @@ def split_to_caption_sentences(
                     result.append(s)  # 无可切点，保留整段（max_chars 超限罕见）
             continue
 
-        # 按次级标点切分，每段目标 ideal_chars~max_chars
+        # 按次级标点切分，每段目标 ideal_chars~max_chars（中文字数）
         cur = ""
         for i, ch in enumerate(s):
             cur += ch
-            if ch in ',;:。！？、——，；：.':
+            if ch in ',;:。！？、——，；：':
                 # 在标点后切（cur 已包含该标点）
-                if len(cur) >= min_chars:
+                if _cn_count(cur) >= min_chars:
                     result.append(cur.strip())
                     cur = ""
         if cur.strip():
             result.append(cur.strip())
 
-    # 4. 最后处理: 合并过短的, 拆过长的
+    # 3.5 短段回合并（v1.5.4）：前段 < min_chars → 把当前段也吸进来（或前段 ≥ min_chars + 当前段 < min_chars → 当前段吸到前段）
+    # 简化版：循环合并所有 < min_chars 的相邻对
+    if result:
+        changed = True
+        while changed:
+            changed = False
+            merged_back = []
+            for s in result:
+                if merged_back and _cn_count(s) < min_chars:
+                    # 当前段 < min_chars → 吸到上一段
+                    merged_back[-1] = (merged_back[-1] + s).strip()
+                    changed = True
+                else:
+                    merged_back.append(s)
+            result = merged_back
+
+    # 4. 最后处理: 拆过长的（兜底，中文字数判断）
     final = []
     for s in result:
         s = s.strip()
         if not s:
             continue
-        if len(s) > max_chars:
+        if _cn_count(s) > max_chars:
             # 仍过长，找最近标点切（不硬切）
             best = -1
             for i, ch in enumerate(s):
@@ -128,7 +156,7 @@ def split_to_caption_sentences(
                 fallback = -1
                 for i, ch in enumerate(s):
                     if ch in ',;:。！？、——，；：.' and 0 < i < len(s) - 1:
-                        if len(s[:i+1].strip()) >= min_chars and len(s[i+1:].strip()) >= min_chars:
+                        if _cn_count(s[:i+1].strip()) >= min_chars and _cn_count(s[i+1:].strip()) >= min_chars:
                             fallback = i + 1
                             break  # 取第一个能切的就行
                 best = fallback
@@ -142,15 +170,20 @@ def split_to_caption_sentences(
         else:
             final.append(s)
 
-    # 5. 合并 2-3 字的微短句
+    # 5. 合并微短句（中文字数 < 5 视为微短句）
     cleaned = []
     for s in final:
-        if cleaned and len(s) < 5 and len(cleaned[-1]) < ideal_chars + 4:
+        if cleaned and _cn_count(s) < 5 and _cn_count(cleaned[-1]) < ideal_chars + 4:
             cleaned[-1] = (cleaned[-1] + s).strip()
         else:
             cleaned.append(s)
 
-    return [s for s in cleaned if len(s) >= 1]
+    # 6. 末段吸附（v1.5.4 新增）：最后 1 句 < 10 字 → 吸附到倒数第 2 句
+    if len(cleaned) >= 2 and _cn_count(cleaned[-1]) < min_chars:
+        last = cleaned.pop()
+        cleaned[-1] = (cleaned[-1] + last).strip()
+
+    return [s for s in cleaned if _cn_count(s) >= 1]
 
 
 # ============== 时间戳估算 ==============

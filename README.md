@@ -5,7 +5,7 @@
 **从口播稿到 MP4 视频，端到端一条流水线**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5.3-blue.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-1.5.4-blue.svg)](SKILL.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](requirements.txt)
 [![Node](https://img.shields.io/badge/node-20%2B-green.svg)](https://nodejs.org)
 [![Skill](https://img.shields.io/badge/Claude%20Code-Skill-purple.svg)](SKILL.md)
@@ -39,6 +39,7 @@
 | 首页文字偏小没封面观感 | **首页封面规范（v1.5.0 强制）**：148px / 900 字重 + 角标 + 页码 + 渐变背景 |
 | 字幕太碎（"<10 字句"过多，观众跟不上画面） | **硬约束 #6**：每段字幕中文字符数 ≥ 10 字，min_chars=10/ideal=18/max=22，SubsGen.py 默认值已改 |
 | 字幕切散自然句（次级标点优先级过强，"过去的玩法是做一个 App，大家来用"被拆成两半破坏语义）| **🎯 v1.5.3 第一原则：按自然句断句**：自然句边界（。！？）神圣不可破，次级标点（,;:、——）只在单自然句 > 22 字时作为内部拆分点，绝不跨自然句切句 |
+| 文档说"≥10 中文字"但代码用 `len()` 算字符总数，9 字 + 句号 = 11 字符通过硬约束不被合并（27/39 字幕 < 10 字）| **🔧 v1.5.4 关键修复**：helper `_cn_count(s) = len(re.findall(r'[一-鿿]', s))` 统一中文字数；Step 2/3/4/5 全部改用 `_cn_count()`；加 Step 3.5 短段回合并 + Step 6 末段吸附 |
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: multi-agent-tts-html
 description: "Use when 用户需要：口播稿写作（反 AI 味 + 禁用第一人称）、MiniMax TTS 语音合成、Edge TTS 兜底、字幕轨生成（SRT/VTT/JSON，每段 ≥10 字 + 按自然句断句）、16:9 视频化 HTML 排版（HyperFrames，唯一浅色风格 + 首页加大加粗封面，标准模板 `templates/light-style-wx-agent-ai.html`）、一键渲染 MP4 视频。**核心流程**：口播稿 → GATE1 → TTS+字幕 → 内容映射 → HyperFrames HTML排版 → GATE2 → 渲染 MP4。**一条命令出片**。**硬约束**：GATE1 必过 / GATE2 必过 / 翻页每 10s / 不虚构数字/场景/人物 / 禁用第一人称 / 字幕≥10字 / 按自然句断句。兼容触发词：MiniMax TTS / mmx-tts / MD转MP3 / 反AI味 / 浅色风格 / 封面。"
-version: 1.5.3
+version: 1.5.4
 author: Muru AI
 license: MIT
 platforms: [linux, macos, windows]
@@ -872,6 +872,7 @@ multi-agent-tts-html/
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | **1.2.1** | 2026-06-14 | **F-002 复现修复**：删除 F-008 加的 `.clip[data-start="0"]` 兜底规则（与 `.clip.active` 同特异性导致 page-1 永远不隐藏），依赖 JS 在 DOMContentLoaded 立即 `applyState()` 给第一页加 `.active`；给 `.hf-root` 加 `overflow: hidden` 防装饰元素溢出 |
+| **1.5.4** | 2026-06-19 | **🔧 SubsGen.py 关键修复（体检发现）**：①加 helper `_cn_count(s) = len(re.findall(r'[一-鿿]', s))` 统一中文字数②Step 2/3/4/5 全部 `len()` 阈值判断改用 `_cn_count()`③加 Step 3.5 短段回合并（循环到全合规）④加 Step 6 末段吸附⑤回归测试：wx-agent-ai 案例 27/39 违规（69%）→ 0/21 合规（100%） |
 | **1.5.3** | 2026-06-19 | **🎯 字幕按自然句断句（第一原则）**：5 步切句规则改写为「按自然句优先」原则：①自然句边界（。！？）神圣不可破 ②次级标点（,;:、——）只在单自然句 > 22 字时作为内部拆分点 ③明确「自然句完整优先于字数硬约束」——短自然句可继续向后合并 ④新增「边界优先级」表（自然句 >>> 次级 >>> 兜底）⑤新增硬规则「绝不允许跨自然句切句」 |
 | **1.3.0** | 2026-06-14 | **GATE 1 强制阻断机制上线**：`tts-with-subs.py` 和 `md2mp3.py` 必须显式传 `--gate1-approved` 才能调 TTS，否则 exit(1)。把硬约束 #1 从文档约束升级为技术约束 |
 | **1.5.2** | 2026-06-19 | **📏 字幕字数硬约束 ≥10 字**：①新增硬约束 #6「每段字幕中文字符数 ≥ 10 字」②Phase 0.3 新增「📏 字幕字数硬约束」章节，含 min_chars=10/ideal=18/max=22 参数表 + 「为什么是 10 字」原理 + 5 步切句规则 + 验证脚本③`SubsGen.py` `generate_subtitles_for_text` 默认 min_chars 6→10、max_chars 18→22；CLI `--min-chars` 默认 6→10 |
