@@ -47,6 +47,7 @@
 | F-016 | 2026-06-19 | Phase 3 | `hyperframes lint` 报 `media_missing_id: <audio> has data-start but no id attribute. The renderer requires id to discover media elements — this audio will be SILENT in renders` | 给 audio 加 `id="voiceover"`（任意唯一字符串即可）。v1.5.0 完整模板固定此 id | v1.5.0 |
 | F-017 | 2026-06-19 | Phase 3 | 用户多次复述"首页文字加大加粗，兼顾封面效果"但 SKILL.md 没有封面规范，每次都要重新设计 | 固化「首页封面规范」：主标题 148px / weight 900 / max-width 1700px / text-shadow 品牌色微光 + kicker 36px 600 绿 + 副标 46px 500 + 左上角标 28px（14px 绿点 + 大写英文） + 右下页码 24px（"01 / 08"） + 渐变背景 `#FFFFFF→#F0F4F1`。详见 v1.5.0「🎨 视觉风格规范」 | v1.5.0 |
 | F-018 | 2026-06-19 | Phase 3 | SKILL.md 含多套 HTML 模板（harness-intro 4 页版式 / 浅色 vs 深色对比 / 完整 HTML 头部内嵌），用户每次出片 AI 不知道用哪套 | ①`templates/light-style-wx-agent-ai.html` 沉淀为**唯一标准模板**（lint 0 errors）②删除 `examples/harness-intro/` 深色风格示例③删除「4 页版式参考」「浅色 vs 深色对比」「完整 HTML 头部」3 处冗余模板④8 页版式表改为与模板文件 1:1 对应（带 CSS 类名） | v1.5.1 |
+| F-019 | 2026-06-19 | Phase 0.3 | 微信 Agent 案例 39 句字幕中 27 句 < 10 字（69% 太短）："嗯..."（5字）、"嗯... 想象一下"（5字）、"过去"（4字）... 观众眼睛跟不上画面切换 | ①硬约束表新增 #6「字幕 ≥ 10 字」②Phase 0.3 新增「📏 字幕字数硬约束」章节（参数表 + 原理 + 切句规则 + 验证脚本）③`SubsGen.py` `generate_subtitles_for_text` 默认 min_chars 6→10、max_chars 18→22；CLI `--min-chars` 默认 6→10 | v1.5.2 |
 
 ---
 

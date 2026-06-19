@@ -107,6 +107,13 @@ hyperframes lint <project>
 - [ ] `overlapping_clips_same_track` page slide duration 减 0.05s？
 - [ ] `font_family_without_font_face` 字体用 sans-serif 兜底？
 
+### 📏 字幕字数自检（v1.5.2 硬约束 #6）
+
+- [ ] 解析 `*.segments.json` 所有 cues，正则 `[一-鿿]` 统计中文字符数 = 0 条 < 10 字？
+- [ ] 末句允许 ≥ 5 字（容忍短收尾）？
+- [ ] `SubsGen.py` 中 `min_chars: int = 10`（不是 6）？
+- [ ] CLI `--min-chars` 默认值 = 10？
+
 ---
 
 ## 🔗 关联

@@ -287,8 +287,8 @@ def to_json(timestamps: List[Dict], meta: Optional[Dict] = None) -> str:
 def generate_subtitles_for_text(
     text: str,
     audio_path: Optional[str] = None,
-    min_chars: int = 6,
-    max_chars: int = 18,
+    min_chars: int = 10,
+    max_chars: int = 22,
 ) -> Dict:
     """
     给定口播文本,自动:
@@ -348,7 +348,7 @@ def main():
     parser.add_argument("--audio", "-a", help="音频文件路径(用 ffprobe 探测真实时长)")
     parser.add_argument("--output-dir", "-o", default="./output", help="输出目录")
     parser.add_argument("--base-name", default="subtitles", help="输出文件基础名")
-    parser.add_argument("--min-chars", type=int, default=6, help="字幕句最短字符数")
+    parser.add_argument("--min-chars", type=int, default=10, help="字幕句最短字符数（v1.5.2 硬约束 ≥10）")
     parser.add_argument("--max-chars", type=int, default=18, help="字幕句最长字符数")
     parser.add_argument("--format", "-f", default="all",
                         choices=["srt", "vtt", "json", "all"],

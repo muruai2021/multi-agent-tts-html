@@ -1,7 +1,7 @@
 ---
 name: multi-agent-tts-html
-description: "Use when 用户需要：口播稿写作（反 AI 味 + 禁用第一人称）、MiniMax TTS 语音合成、Edge TTS 兜底、字幕轨生成（SRT/VTT/JSON）、16:9 视频化 HTML 排版（HyperFrames，唯一浅色风格 + 首页加大加粗封面，标准模板 `templates/light-style-wx-agent-ai.html`）、一键渲染 MP4 视频。**核心流程**：口播稿 → GATE1 → TTS+字幕 → 内容映射 → HyperFrames HTML排版 → GATE2 → 渲染 MP4。**一条命令出片**。**硬约束**：GATE1 必过 / GATE2 必过 / 翻页每 10s / 不虚构数字/场景/人物 / 禁用第一人称。兼容触发词：MiniMax TTS / mmx-tts / MD转MP3 / 反AI味 / 浅色风格 / 封面。"
-version: 1.5.1
+description: "Use when 用户需要：口播稿写作（反 AI 味 + 禁用第一人称）、MiniMax TTS 语音合成、Edge TTS 兜底、字幕轨生成（SRT/VTT/JSON，每段 ≥10 字硬约束）、16:9 视频化 HTML 排版（HyperFrames，唯一浅色风格 + 首页加大加粗封面，标准模板 `templates/light-style-wx-agent-ai.html`）、一键渲染 MP4 视频。**核心流程**：口播稿 → GATE1 → TTS+字幕 → 内容映射 → HyperFrames HTML排版 → GATE2 → 渲染 MP4。**一条命令出片**。**硬约束**：GATE1 必过 / GATE2 必过 / 翻页每 10s / 不虚构数字/场景/人物 / 禁用第一人称 / 字幕≥10字。兼容触发词：MiniMax TTS / mmx-tts / MD转MP3 / 反AI味 / 浅色风格 / 封面。"
+version: 1.5.2
 author: Muru AI
 license: MIT
 platforms: [linux, macos, windows]
@@ -102,7 +102,7 @@ cd                    # Windows CMD（显示当前目录）
 
 ---
 
-## 🚨 硬约束（5 条，必须死守）
+## 🚨 硬约束（6 条，必须死守）
 
 | # | 硬约束 | 触发时机 | 违规动作 |
 |---|--------|----------|----------|
@@ -111,6 +111,7 @@ cd                    # Windows CMD（显示当前目录）
 | 3 | **翻页节奏：每 10 秒一页** | Phase 3 排版时 | 8 分钟做 4 页 ❌ |
 | 4 | **不虚构数字/场景/人物** | Phase 2/3 全程 | 排版出现字幕里没有的内容 |
 | 5 | ⛔ **禁用第一人称**（"我跟你说"、"我跟你讲"、"我有个朋友"、"反正我..."） | Phase 0.1 写稿 | "我" 出现次数 > 0 |
+| 6 | ⛔ **字幕字数 ≥ 10 字**（每段字幕中文字符数，含停顿符号但不含标点空白）| Phase 0.3 字幕生成 | 出现 < 10 字的字幕句（除全文末句） |
 
 ---
 
@@ -305,17 +306,57 @@ python scripts/tts-with-subs.py <口播稿.md> --md --output <项目名> --all-s
 #   <项目名>.segments.json ← JSON 时间戳
 ```
 
-**字幕切句规则**（SubsGen.py）：
-- 主切分：`。！？`
-- 短句合并：不足 6 字与下一句合并
-- 长句拆分：按 `,;:——` 次级标点
-- 停顿加成：`...` +0.5s，`——` +0.3s，`,;:` +0.15s
-- **绝不硬切单词**
-- 提供音频路径时用 ffprobe 归一化到真实时长
+### 📏 字幕字数硬约束（v1.5.2）
+
+> **每段字幕中文字符数 ≥ 10 字**（不含标点和空白）。
+> 这是从 2026-06-19 微信 Agent 案例复盘中总结的硬约束——上次默认 6 字导致 27/39 句字幕碎到 <10 字（69% 字幕太短），观众眼睛跟不上画面切换。
+
+| 参数 | 值 | 来源 |
+|------|-----|------|
+| **`min_chars`**（最短）| **10 字** | 硬约束，避免碎句 |
+| `ideal_chars`（理想）| 18 字 | 默认值 |
+| `max_chars`（最长）| 22 字 | 默认值（避免一行字太满） |
+| `max_chars` 软上限 | 26 字 | split_to_caption_sentences 兜底 |
+
+**为什么是 10 字**：
+- < 6 字：单字/双字句太碎，观众还没看清就切了
+- 6-9 字：还行但偏短，本案例 27 句属此类
+- **10-22 字**：黄金区间，**4.0 字/秒朗读节奏下停留 2.5-5.5s**，正好读一遍
+- > 26 字：单句超过 6.5s，画面静止太久无变化
+
+### 字幕切句规则（SubsGen.py v1.5.2）
+
+**5 步优先级**：
+1. **主切分**：`。！？` → 得到"自然句"
+2. **短句合并**：不足 10 字与下一句合并，直到 ≥ 10 字
+3. **长句拆分**：> 18 字按 `,;:、——` 次级标点切，优先在标点后切
+4. **强制硬拆**：> 22 字按最近次级标点硬拆（不切单词）
+5. **兜底硬拆**：> 26 字在最近次级标点切；无效时退而求其次找任一可切点
+
+**停顿加成**：
+- `...` → +0.5s
+- `——` → +0.3s
+- `,;:` → +0.15s
+
+**硬规则**：
+- ❌ **绝不允许 < 10 字**（除非全文最后一句）
+- ❌ **绝不允许硬切单词**（单字成句）
+- ✅ 提供音频路径时用 ffprobe 归一化到真实时长
 
 **时间精度**：
 - `base_speed = 4.0 字/秒`（240 字/分，与 SKILL 一致）
 - ffprobe 归一化后精度 ±0.3-1s
+
+**验证脚本**（GATE 1 通过前必跑）：
+
+```python
+import json, re
+data = json.load(open('<项目名>.segments.json'))
+violations = [t for t in data['timestamps']
+              if len(re.findall(r'[一-鿿]', t['text'])) < 10]
+print(f'cues < 10 chars: {len(violations)} / {len(data["timestamps"])}')
+# 期望输出：cues < 10 chars: 0 / 39
+```
 
 ---
 
@@ -812,6 +853,7 @@ multi-agent-tts-html/
 |------|------|------|
 | **1.2.1** | 2026-06-14 | **F-002 复现修复**：删除 F-008 加的 `.clip[data-start="0"]` 兜底规则（与 `.clip.active` 同特异性导致 page-1 永远不隐藏），依赖 JS 在 DOMContentLoaded 立即 `applyState()` 给第一页加 `.active`；给 `.hf-root` 加 `overflow: hidden` 防装饰元素溢出 |
 | **1.3.0** | 2026-06-14 | **GATE 1 强制阻断机制上线**：`tts-with-subs.py` 和 `md2mp3.py` 必须显式传 `--gate1-approved` 才能调 TTS，否则 exit(1)。把硬约束 #1 从文档约束升级为技术约束 |
+| **1.5.2** | 2026-06-19 | **📏 字幕字数硬约束 ≥10 字**：①新增硬约束 #6「每段字幕中文字符数 ≥ 10 字」②Phase 0.3 新增「📏 字幕字数硬约束」章节，含 min_chars=10/ideal=18/max=22 参数表 + 「为什么是 10 字」原理 + 5 步切句规则 + 验证脚本③`SubsGen.py` `generate_subtitles_for_text` 默认 min_chars 6→10、max_chars 18→22；CLI `--min-chars` 默认 6→10 |
 | **1.5.1** | 2026-06-19 | **🎨 单一浅色风格 + 标准模板**：`templates/light-style-wx-agent-ai.html` 沉淀为唯一标准模板（lint 0 errors 全过版）。①删除「4 页版式参考（harness-intro 案例）」旧模板（cover-magazine/three-pillars/terminal/manuscript）②删除「浅色 vs 深色风格对比表」③删除「完整 HTML 头部」内嵌模板，改为指向 `templates/light-style-wx-agent-ai.html` 文件④删除 `examples/harness-intro/` 深色风格示例目录⑤8 页版式表改为标准化（与模板文件 1:1 对应，含 CSS 类名）⑥字体规范简化为统一 `sans-serif` 兜底 |
 | **1.5.0** | 2026-06-19 | **🎨 视觉风格规范 + 首页封面 + 禁用第一人称**：①新增「🎨 视觉风格规范」章节，固化浅色风格色板（米白 #FAFAF7 / 微信绿 #07C160 / 字体 sans-serif）、首页封面模板（148px 900 字重 + kicker 角标 + 页码 + 渐变背景）、8 页版式参考、浅色 vs 深色风格对照、完整 HTML 模板（lint 全过版）②硬约束新增 #5「禁用第一人称」③反 AI 味禁用词表加第一人称条④10 项自检加第一人称核查项⑤10 种钩子模板示例去"我"⑥description 加浅色风格 / 封面 / 禁用第一人称触发词 |
 | **1.4.0** | 2026-06-14 | **🎬 字幕样式规范固化**：Phase 3 新增「字幕样式规范」章节，强制 42px / 21px 60px padding / 三层 text-shadow / bottom 118px / 禁用背景容器。所有 harness-intro 系列视频必须使用此规范 |
