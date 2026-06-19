@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>微信把门打开了，AI 的超级入口要变天</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1920px; height:1080px; overflow:hidden;
+    font-family: sans-serif;
+    background:#FAFAF7; color:#1A1A1A; }
+
+  .hf-root { position:relative; width:1920px; height:1080px; overflow:hidden; }
+
+  /* 通用页面容器 */
+  .slide { position:absolute; inset:0; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:80px 120px;
+    background:#FAFAF7; }
+
+  /* ============== 页面 1：封面（加大加粗） ============== */
+  .page-1 {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%);
+  }
+  .page-1 .kicker {
+    font-size:36px; font-weight:600; color:#07C160; letter-spacing:8px;
+    margin-bottom:48px; text-transform:uppercase;
+  }
+  .page-1 .title {
+    font-size:148px; font-weight:900; line-height:1.18; text-align:center;
+    color:#111; letter-spacing:2px; max-width:1700px;
+    text-shadow: 0 4px 24px rgba(7,193,96,0.08);
+  }
+  .page-1 .title .accent { color:#07C160; }
+  .page-1 .subtitle {
+    margin-top:56px; font-size:46px; font-weight:500; color:#555;
+    letter-spacing:4px;
+  }
+  .page-1 .corner-mark {
+    position:absolute; top:60px; left:80px;
+    font-size:28px; font-weight:700; color:#888; letter-spacing:3px;
+  }
+  .page-1 .corner-mark::before {
+    content:""; display:inline-block; width:14px; height:14px;
+    background:#07C160; border-radius:50%; margin-right:14px;
+    vertical-align:middle;
+  }
+  .page-1 .corner-num {
+    position:absolute; bottom:60px; right:80px;
+    font-size:24px; color:#999; font-weight:600; letter-spacing:2px;
+  }
+
+  /* ============== 页面 2：13亿+接口放开 ============== */
+  .page-2 .label {
+    font-size:34px; color:#888; font-weight:600; letter-spacing:6px;
+    margin-bottom:40px;
+  }
+  .page-2 .bignum {
+    font-size:280px; font-weight:900; color:#07C160; line-height:1;
+    letter-spacing:-4px;
+  }
+  .page-2 .bignum-sub {
+    font-size:54px; font-weight:700; color:#222; margin-top:20px;
+  }
+  .page-2 .arrow {
+    margin-top:80px; font-size:44px; font-weight:700; color:#1a1a1a;
+    padding:30px 80px; border:4px solid #07C160; border-radius:80px;
+    background:#fff;
+  }
+
+  /* ============== 页面 3：引言+过去玩法 ============== */
+  .page-3 .quote-mark {
+    font-size:240px; font-weight:900; color:#07C160; line-height:0.6;
+    align-self:flex-start; margin-left:80px;
+  }
+  .page-3 .quote {
+    font-size:84px; font-weight:800; color:#1A1A1A; line-height:1.35;
+    text-align:center; max-width:1500px; margin:40px 0;
+  }
+  .page-3 .quote .em { color:#07C160; }
+  .page-3 .divider {
+    width:120px; height:6px; background:#07C160; margin:30px 0;
+  }
+  .page-3 .cite {
+    font-size:32px; color:#666; font-weight:500; letter-spacing:3px;
+  }
+
+  /* ============== 页面 4：聊天框 mockup ============== */
+  .page-4 .label {
+    font-size:34px; color:#888; font-weight:600; letter-spacing:6px;
+    margin-bottom:36px; align-self:flex-start; margin-left:60px;
+  }
+  .phone {
+    width:1100px; background:#fff; border-radius:60px;
+    box-shadow:0 30px 80px rgba(0,0,0,0.08), 0 0 0 2px #EEE;
+    padding:50px 60px;
+  }
+  .phone-header {
+    display:flex; align-items:center; padding-bottom:30px;
+    border-bottom:2px solid #F0F0F0; margin-bottom:30px;
+  }
+  .phone-header .avatar {
+    width:80px; height:80px; border-radius:50%;
+    background:linear-gradient(135deg,#07C160,#04A050);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:36px; font-weight:800;
+  }
+  .phone-header .name {
+    margin-left:24px; font-size:38px; font-weight:700; color:#222;
+  }
+  .phone-header .status {
+    margin-left:auto; font-size:26px; color:#07C160; font-weight:600;
+  }
+  .msg {
+    padding:30px 40px; border-radius:30px; margin:20px 0;
+    font-size:38px; font-weight:500; line-height:1.5; max-width:780px;
+  }
+  .msg.user {
+    background:#95EC69; color:#000; margin-left:auto;
+  }
+  .msg.ai {
+    background:#F4F4F4; color:#222;
+  }
+  .msg.ai .typing {
+    color:#07C160; font-weight:700; font-size:34px;
+  }
+  .phone-foot {
+    margin-top:30px; padding-top:24px; border-top:2px solid #F0F0F0;
+    font-size:30px; color:#999; text-align:center;
+  }
+  .page-4 .caption {
+    margin-top:48px; font-size:40px; font-weight:700; color:#333;
+  }
+  .page-4 .caption .em { color:#07C160; font-size:48px; }
+
+  /* ============== 页面 5：机会 01 ============== */
+  .page-5 .label {
+    font-size:34px; color:#888; font-weight:600; letter-spacing:6px;
+    margin-bottom:30px; align-self:flex-start; margin-left:60px;
+  }
+  .page-5 .big-num {
+    font-size:360px; font-weight:900; color:#07C160; line-height:0.9;
+    align-self:flex-start; margin-left:120px;
+    text-shadow: 0 8px 0 #E8F8EF;
+  }
+  .page-5 .heading {
+    font-size:72px; font-weight:800; color:#1A1A1A; line-height:1.3;
+    margin:30px 0 0 120px; align-self:flex-start;
+  }
+  .page-5 .heading .em { color:#07C160; }
+  .page-5 .desc {
+    font-size:38px; font-weight:500; color:#555; line-height:1.5;
+    margin:24px 0 0 120px; align-self:flex-start; max-width:1500px;
+  }
+
+  /* ============== 页面 6：三栏机会 ============== */
+  .page-6 .label {
+    font-size:34px; color:#888; font-weight:600; letter-spacing:6px;
+    margin-bottom:50px; align-self:flex-start; margin-left:60px;
+  }
+  .page-6 .tri {
+    display:flex; gap:40px; width:100%; max-width:1700px;
+  }
+  .page-6 .card {
+    flex:1; background:#fff; border-radius:40px; padding:60px 50px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.06);
+    border-top:8px solid #07C160;
+    display:flex; flex-direction:column; align-items:flex-start;
+  }
+  .page-6 .num {
+    font-size:80px; font-weight:900; color:#07C160; line-height:1;
+  }
+  .page-6 .card h3 {
+    font-size:48px; font-weight:800; color:#1A1A1A; margin:30px 0 24px;
+    line-height:1.3;
+  }
+  .page-6 .card p {
+    font-size:30px; font-weight:500; color:#555; line-height:1.6;
+  }
+  .page-6 .foot {
+    margin-top:60px; font-size:42px; font-weight:700; color:#222;
+  }
+  .page-6 .foot .em { color:#07C160; }
+
+  /* ============== 页面 7：拆门槛+流量 ============== */
+  .page-7 {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%);
+  }
+  .page-7 .kicker {
+    font-size:34px; color:#07C160; font-weight:700; letter-spacing:8px;
+    margin-bottom:40px;
+  }
+  .page-7 .main {
+    font-size:120px; font-weight:900; color:#111; line-height:1.2;
+    text-align:center; max-width:1600px;
+  }
+  .page-7 .main .em { color:#07C160; }
+  .page-7 .sub {
+    margin-top:60px; font-size:46px; font-weight:600; color:#555;
+    text-align:center; line-height:1.5; max-width:1500px;
+  }
+  .page-7 .rule {
+    width:160px; height:8px; background:#07C160; margin:40px 0;
+  }
+
+  /* ============== 页面 8：收尾 ============== */
+  .page-8 { background:#FFFFFF; }
+  .page-8 .dot {
+    width:36px; height:36px; background:#07C160; border-radius:50%;
+    margin-bottom:50px;
+  }
+  .page-8 .out {
+    font-size:96px; font-weight:900; color:#111; line-height:1.3;
+    text-align:center;
+  }
+  .page-8 .out .em { color:#07C160; }
+  .page-8 .sign {
+    margin-top:80px; font-size:28px; color:#888; letter-spacing:4px;
+    font-weight:500;
+  }
+
+  /* ============== 字幕 bar（v1.4.0 规范） ============== */
+  #sub-bar {
+    position:absolute; bottom:118px; left:0; right:0;
+    display:flex; flex-direction:column; align-items:center;
+    pointer-events:none; z-index:50;
+  }
+  .sub-cue {
+    position:absolute; top:0; left:0; right:0;
+    background:none; color:#fff;
+    font-family: sans-serif;
+    font-size:42px; font-weight:700;
+    padding:21px 60px; text-align:center;
+    width:100%; white-space:nowrap; letter-spacing:1.5px;
+    text-shadow:
+      0 0 8px  rgba(0,0,0,1),
+      0 2px 16px rgba(0,0,0,0.9),
+      0 4px 28px rgba(0,0,0,0.7);
+  }
+
+  /* HyperFrames 隐藏未激活页面 */
+  .slide.clip { visibility:hidden; }
+  .slide.clip.active { visibility:visible; }
+</style>
+</head>
+<body>
+
+<div class="hf-root" data-composition-id="wx-agent-ai"
+     data-width="1920" data-height="1080" data-start="0">
+
+  <audio id="voiceover" src="wx-agent-ai.mp3" data-start="0" data-duration="76.896"></audio>
+
+  <!-- ========== Page 1 封面 0-10s ========== -->
+  <section class="slide page-1 clip active" data-start="0" data-duration="9.85" data-track-index="0">
+    <div class="corner-mark">WECHAT × AI AGENT</div>
+    <div class="kicker">2026 · 微信生态</div>
+    <h1 class="title">微信把门打开了<br><span class="accent">AI 的超级入口要变天</span></h1>
+    <div class="subtitle">—— 一条消息，撬动 13 亿用户</div>
+    <div class="corner-num">01 / 08</div>
+  </section>
+
+  <!-- ========== Page 2 9.9-21.2s ========== -->
+  <section class="slide page-2 clip" data-start="9.9" data-duration="11.25" data-track-index="0">
+    <div class="label">CUE 02 · 数字</div>
+    <div class="bignum">13<span style="font-size:120px;color:#07C160;">亿</span></div>
+    <div class="bignum-sub">人每天点开的第一个 App —— 还是微信</div>
+    <div class="arrow">↓ 这次，Agent 的接口被放开了 ↓</div>
+  </section>
+
+  <!-- ========== Page 3 21.2-32.3s ========== -->
+  <section class="slide page-3 clip" data-start="21.2" data-duration="11.05" data-track-index="0">
+    <div class="quote-mark">"</div>
+    <div class="quote">这不是小动作，<br>是把<span class="em">超级入口</span>重新定义一遍。</div>
+    <div class="divider"></div>
+    <div class="cite">过去的玩法 · 做一个 App，大家来用</div>
+  </section>
+
+  <!-- ========== Page 4 32.3-42.8s ========== -->
+  <section class="slide page-4 clip" data-start="32.3" data-duration="10.45" data-track-index="0">
+    <div class="label">CUE 04 · 场景</div>
+    <div class="phone">
+      <div class="phone-header">
+        <div class="avatar">小</div>
+        <div class="name">小微 Agent</div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="msg user">叫一辆明早 8 点去机场的车</div>
+      <div class="msg ai"><span class="typing">已搞定 →</span> 商务车已预约，明天 7:40 出发</div>
+      <div class="phone-foot">—— 对话框里，Agent 顺手就办了</div>
+    </div>
+    <div class="caption">不用切出去跳五个 App，<span class="em">在微信里就办完</span></div>
+  </section>
+
+  <!-- ========== Page 5 42.8-52.5s ========== -->
+  <section class="slide page-5 clip" data-start="42.8" data-duration="9.65" data-track-index="0">
+    <div class="label">CUE 05 · 机会</div>
+    <div class="big-num">01</div>
+    <h2 class="heading">做 Agent 的<span class="em">小团队</span></h2>
+    <p class="desc">第一次拿到了十几亿用户的牌桌。<br>不再是大厂的独角戏 —— 每个有想法的开发者，都能直接接入。</p>
+  </section>
+
+  <!-- ========== Page 6 52.5-64.3s ========== -->
+  <section class="slide page-6 clip" data-start="52.5" data-duration="11.75" data-track-index="0">
+    <div class="label">CUE 06 · 三块机会</div>
+    <div class="tri">
+      <div class="card">
+        <div class="num">02</div>
+        <h3>本地生活 ·<br>电商 · 出行</h3>
+        <p>场景被重新洗一次牌，<br>谁能长进微信，<br>谁抢到下一波流量。</p>
+      </div>
+      <div class="card">
+        <div class="num">03</div>
+        <h3>企业服务<br>会爆</h3>
+        <p>每个公众号、每个<br>小程序背后，<br>都可能跑着专属 AI。</p>
+      </div>
+    </div>
+    <div class="foot">说白了 —— 微信这次不是加功能，是<span class="em">把门槛拆了</span>。</div>
+  </section>
+
+  <!-- ========== Page 7 64.3-73.7s ========== -->
+  <section class="slide page-7 clip" data-start="64.3" data-duration="9.35" data-track-index="0">
+    <div class="kicker">CUE 07 · 结论</div>
+    <div class="rule"></div>
+    <div class="main">谁先<span class="em">长进去</span>，<br>谁就吃到下一个<br>十年的<span class="em">超级流量</span></div>
+    <div class="sub">—— 一张十几亿用户的牌桌，正在重新发牌</div>
+  </section>
+
+  <!-- ========== Page 8 73.7-76.9s ========== -->
+  <section class="slide page-8 clip" data-start="73.7" data-duration="3.146" data-track-index="0">
+    <div class="dot"></div>
+    <div class="out">反正，<span class="em">已经有人</span><br>在动手了。</div>
+    <div class="sign">—— END · WECHAT × AI AGENT</div>
+  </section>
+
+  <!-- ========== 字幕轨（39 句）========== -->
+  <div id="sub-bar">
+    <div class="sub-cue clip" data-start="0"     data-duration="2.01"  data-track-index="1">你有没有这种感觉.</div>
+    <div class="sub-cue clip" data-start="2.01"  data-duration="0.457" data-track-index="1">.. 微信，</div>
+    <div class="sub-cue clip" data-start="2.467" data-duration="2.462" data-track-index="1">好像从来没这么主动过。</div>
+    <div class="sub-cue clip" data-start="4.935" data-duration="2.279" data-track-index="1">嗯... 一条消息炸出来—</div>
+    <div class="sub-cue clip" data-start="7.219" data-duration="2.691" data-track-index="1">—微信要全面开放 AI 生态接入。</div>
+    <div class="sub-cue clip" data-start="9.915" data-duration="2.691" data-track-index="1">说白了，这事儿没那么玄乎。</div>
+    <div class="sub-cue clip" data-start="12.61" data-duration="3.148" data-track-index="1">13 亿人每天点开的第一个 App 是什么？</div>
+    <div class="sub-cue clip" data-start="15.763" data-duration="1.366" data-track-index="1">还是微信。这次，</div>
+    <div class="sub-cue clip" data-start="17.134" data-duration="1.823" data-track-index="1">腾讯把 Agent 的接口放开，</div>
+    <div class="sub-cue clip" data-start="18.961" data-duration="2.279" data-track-index="1">让外面的 AI 直接长进聊天、</div>
+    <div class="sub-cue clip" data-start="21.246" data-duration="1.777" data-track-index="1">公众号、小程序里。</div>
+    <div class="sub-cue clip" data-start="23.028" data-duration="1.823" data-track-index="1">... 这不是小动作，</div>
+    <div class="sub-cue clip" data-start="24.855" data-duration="2.919" data-track-index="1">是把超级入口重新定义一遍。</div>
+    <div class="sub-cue clip" data-start="27.779" data-duration="2.051" data-track-index="1">过去的玩法是"做一个 App，</div>
+    <div class="sub-cue clip" data-start="29.835" data-duration="1.092" data-track-index="1">大家来用"。</div>
+    <div class="sub-cue clip" data-start="30.932" data-duration="1.366" data-track-index="1">现在反过来了—</div>
+    <div class="sub-cue clip" data-start="32.303" data-duration="1.137" data-track-index="1">—"搭一个生态，</div>
+    <div class="sub-cue clip" data-start="33.445" data-duration="1.137" data-track-index="1">谁的 AI 能力强，</div>
+    <div class="sub-cue clip" data-start="34.587" data-duration="1.32" data-track-index="1">谁就接进来"。</div>
+    <div class="sub-cue clip" data-start="35.912" data-duration="1.594" data-track-index="1">嗯... 想象一下，</div>
+    <div class="sub-cue clip" data-start="37.511" data-duration="3.422" data-track-index="1">发条消息"叫一辆明早 8 点去机场的车"，</div>
+    <div class="sub-cue clip" data-start="40.938" data-duration="1.823" data-track-index="1">不用切出去跳五个 App，</div>
+    <div class="sub-cue clip" data-start="42.766" data-duration="2.462" data-track-index="1">对话框里的 Agent 顺手就办了。</div>
+    <div class="sub-cue clip" data-start="45.233" data-duration="1.548" data-track-index="1">... 机会在哪？</div>
+    <div class="sub-cue clip" data-start="46.786" data-duration="1.183" data-track-index="1">三块—— 第一，</div>
+    <div class="sub-cue clip" data-start="47.974" data-duration="1.137" data-track-index="1">做 Agent 的小团队，</div>
+    <div class="sub-cue clip" data-start="49.117" data-duration="3.376" data-track-index="1">第一次拿到了十几亿用户的牌桌。</div>
+    <div class="sub-cue clip" data-start="52.498" data-duration="1.366" data-track-index="1">第二，本地生活、</div>
+    <div class="sub-cue clip" data-start="53.868" data-duration="1.823" data-track-index="1">电商、出行这些场景，</div>
+    <div class="sub-cue clip" data-start="55.696" data-duration="1.777" data-track-index="1">被重新洗一次牌。</div>
+    <div class="sub-cue clip" data-start="57.478" data-duration="1.823" data-track-index="1">第三，企业服务会爆—</div>
+    <div class="sub-cue clip" data-start="59.305" data-duration="1.137" data-track-index="1">—每个公众号、</div>
+    <div class="sub-cue clip" data-start="60.448" data-duration="1.594" data-track-index="1">每个小程序背后，</div>
+    <div class="sub-cue clip" data-start="62.047" data-duration="2.234" data-track-index="1">都可能跑着一个专属 AI。</div>
+    <div class="sub-cue clip" data-start="64.286" data-duration="2.919" data-track-index="1">说白了，微信这次不是加功能.</div>
+    <div class="sub-cue clip" data-start="67.21"  data-duration="1.553" data-track-index="1">.. 是把门槛拆了。</div>
+    <div class="sub-cue clip" data-start="68.763" data-duration="1.594" data-track-index="1">... 谁先长进去，</div>
+    <div class="sub-cue clip" data-start="70.362" data-duration="3.376" data-track-index="1">谁就吃到下一个十年的超级流量。</div>
+    <div class="sub-cue clip" data-start="73.743" data-duration="3.148" data-track-index="1">嗯... 反正，已经有人在动手了。</div>
+  </div>
+
+</div>
+
+<script>
+  // HyperFrames timeline registry（lint 要求）
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  window.__timelines["wx-agent-ai"] = tl;
+
+  // HyperFrames 简单驱动：监听 audio.currentTime 切换 .active
+  (function(){
+    const slides = document.querySelectorAll('.slide.clip');
+    const cues = document.querySelectorAll('.sub-cue.clip');
+    const audio = document.querySelector('audio');
+
+    function applyState(t){
+      slides.forEach(s => {
+        const start = parseFloat(s.dataset.start);
+        const dur = parseFloat(s.dataset.duration);
+        s.classList.toggle('active', t >= start && t < start + dur);
+      });
+      cues.forEach(c => {
+        const start = parseFloat(c.dataset.start);
+        const dur = parseFloat(c.dataset.duration);
+        c.classList.toggle('active', t >= start && t < start + dur);
+      });
+    }
+
+    // 立即应用初始状态（防止黑屏）
+    applyState(0);
+
+    if (audio) {
+      audio.addEventListener('timeupdate', () => applyState(audio.currentTime));
+    }
+
+    // 兜底：定时轮询
+    setInterval(() => {
+      if (audio) applyState(audio.currentTime);
+    }, 100);
+  })();
+</script>
+
+</body>
+</html>

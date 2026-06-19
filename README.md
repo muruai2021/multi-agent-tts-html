@@ -5,7 +5,7 @@
 **从口播稿到 MP4 视频，端到端一条流水线**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/version-1.5.1-blue.svg)](SKILL.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](requirements.txt)
 [![Node](https://img.shields.io/badge/node-20%2B-green.svg)](https://nodejs.org)
 [![Skill](https://img.shields.io/badge/Claude%20Code-Skill-purple.svg)](SKILL.md)

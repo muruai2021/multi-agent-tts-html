@@ -89,6 +89,7 @@
 | RE-015 | F-015 | **字体兜底** → 解析 HTML，验证 `font-family` 不含 `PingFang SC` / `Microsoft YaHei` 等未在 hyperframes 注册的字体（兜底用 `sans-serif`） | ⬜ |
 | RE-016 | F-016 | **audio id 必备** → 解析 HTML，验证 `<audio>` 元素含 `id=` 属性（推荐 `id="voiceover"`） | ⬜ |
 | RE-017 | F-017 | **浅色风格 + 首页封面规范** → 解析 HTML，验证：①背景用 `#FAFAF7` 或 `#FFFFFF→#F0F4F1` 渐变（非 `#000`）②`.page-1 .title` 含 `font-size:148px` 和 `font-weight:900`③`.page-1` 含 `linear-gradient(135deg, #FFFFFF 0%, #F0F4F1 100%)` ④含 `.corner-mark` 和 `.corner-num` ⑤含品牌色 `#07C160` | ⬜ |
+| RE-018 | F-018 | **唯一模板一致性** → 验证 SKILL.md 中无以下字串：`cover-magazine` 出现在「4 页版式参考」、`浅色风格 vs 深色风格对比` 章节、`<div class="hf-root" data-composition-id="xxx"` 等泛用占位模板。同时验证 `templates/light-style-wx-agent-ai.html` 存在且与 SKILL.md 「标准化 8 页版式」表 CSS 类名完全一致 | ⬜ |
 
 ---
 
